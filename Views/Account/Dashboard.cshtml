@@ -1,0 +1,746 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    var userName = Context.Session.GetString("UserName") ?? "Guest User";
+    var userEmail = Context.Session.GetString("UserEmail") ?? "guest@joss.com";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - JOSS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #20c997;
+            --gradient-start: #20c997;
+            --gradient-end: #34d399;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .brand-logo {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .dashboard-card {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            opacity: 0.9;
+            font-weight: 600;
+        }
+
+        .expense-item {
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .expense-item:hover {
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform: translateX(5px);
+        }
+
+        .category-badge {
+            padding: 5px 12px;
+            border-radius: 25px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .btn-add-expense {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            border: none;
+            box-shadow: 0 8px 24px rgba(32, 201, 151, 0.4);
+            font-size: 2rem;
+            color: white;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-add-expense:hover {
+            transform: scale(1.15) rotate(90deg);
+            box-shadow: 0 12px 32px rgba(32, 201, 151, 0.6);
+        }
+
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            padding: 25px;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(32, 201, 151, 0.25);
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(32, 201, 151, 0.4);
+            color: white;
+        }
+
+        .btn-gradient:disabled {
+            opacity: 0.7;
+            transform: none;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            opacity: 0.2;
+            display: block;
+        }
+
+        .action-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .history-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .history-table th {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            padding: 15px;
+        }
+
+        .history-table td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+
+        @@media (max-width: 768px) {
+            .stat-value { font-size: 1.8rem; }
+            .dashboard-card { padding: 20px; }
+            .btn-add-expense { width: 60px; height: 60px; font-size: 1.5rem; bottom: 20px; right: 20px; }
+            .expense-item { padding: 15px; }
+            .modal-body { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 99999;">
+        <div id="successToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive">
+            <div class="d-flex">
+                <div class="toast-body" id="toastMessage"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+        <div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive">
+            <div class="d-flex">
+                <div class="toast-body" id="errorToastMessage"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <i class="bi bi-wallet2 me-2" style="font-size: 1.5rem; color: var(--primary-color);"></i>
+                <span class="brand-logo">JOSS</span>
+            </a>
+
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-person-circle fs-4 me-2" style="color: var(--primary-color);"></i>
+                    <div class="text-start d-none d-md-block">
+                        <div class="fw-bold">@userName</div>
+                        <div class="text-muted small">@userEmail</div>
+                    </div>
+                </div>
+                <a href="@Url.Action("Logout", "Account")" class="btn btn-outline-danger">
+                    <i class="bi bi-box-arrow-right me-1"></i>
+                    <span class="d-none d-md-inline">Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="container-fluid px-3 px-md-4 py-4">
+        <!-- Stats Cards -->
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="dashboard-card stat-card">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="stat-label">
+                                <i class="bi bi-cash-coin me-2"></i>MONTHLY SALARY
+                            </div>
+                            <div class="stat-value" id="salaryAmount">₹@ViewBag.Salary</div>
+                        </div>
+                        <button class="btn btn-light action-btn" id="openSalaryBtn">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="dashboard-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                    <div class="stat-label">
+                        <i class="bi bi-bar-chart me-2"></i>TOTAL EXPENSES
+                    </div>
+                    <div class="stat-value" id="totalExpenses">₹@ViewBag.TotalExpenses</div>
+                    <div style="opacity: 0.9;"><span id="expenseCount">@ViewBag.ExpenseCount</span> transactions</div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-12 mb-4">
+                <div class="dashboard-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                    <div class="stat-label">
+                        <i class="bi bi-piggy-bank me-2"></i>MONTHLY SAVINGS
+                    </div>
+                    <div class="stat-value" id="monthlySavings">₹@ViewBag.MonthlySavings</div>
+                    <div style="opacity: 0.9;"><span id="savingsPercentage">0</span>% of salary</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Expenses + History -->
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="dashboard-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="mb-0"><i class="bi bi-list-ul me-2"></i>Recent Expenses</h4>
+                        <button class="btn btn-outline-danger btn-sm" onclick="clearAllExpenses()">
+                            <i class="bi bi-trash me-1"></i> Clear All
+                        </button>
+                    </div>
+                    <div id="expenseList" style="max-height: 500px; overflow-y: auto;"></div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 mb-4">
+                <div class="dashboard-card">
+                    <h4 class="mb-4"><i class="bi bi-clock-history me-2"></i>Monthly Summary</h4>
+                    <div style="max-height: 500px; overflow-y: auto;">
+                        <table class="table history-table">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th>Savings</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                                @if (ViewBag.History != null)
+                                {
+                                    foreach (var item in ViewBag.History)
+                                    {
+                                        <tr>
+                                            <td class="fw-bold">@item.Month</td>
+                                            <td class="text-success fw-bold">₹@item.Savings</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Expense FAB -->
+    <button class="btn-add-expense" id="openExpenseBtn" title="Add Expense">
+        <i class="bi bi-plus"></i>
+    </button>
+
+    <!-- ===== SALARY MODAL ===== -->
+    <div class="modal fade" id="salaryModal" tabindex="-1" aria-labelledby="salaryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="salaryModalLabel">
+                        <i class="bi bi-cash-coin me-2"></i>Set Monthly Salary
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Monthly Salary Amount</label>
+                        <input type="number" class="form-control" id="salaryInput" placeholder="Enter amount" min="0">
+                    </div>
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle me-2"></i>This will be used to calculate your monthly savings.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-gradient" id="saveSalaryBtn">Save Salary</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ADD / EDIT EXPENSE MODAL ===== -->
+    <div class="modal fade" id="expenseModal" tabindex="-1" aria-labelledby="expenseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="expenseModalLabel">
+                        <i class="bi bi-plus-circle me-2"></i>Add Expense
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="expenseId">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Expense Name</label>
+                        <input type="text" class="form-control" id="expenseName" placeholder="e.g., Groceries">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Amount</label>
+                        <input type="number" class="form-control" id="expenseAmount" placeholder="Enter amount" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Category</label>
+                        <select class="form-select" id="expenseCategory">
+                            <option value="">Choose category...</option>
+                            <option value="Food">🍔 Food</option>
+                            <option value="Transport">🚗 Transport</option>
+                            <option value="Entertainment">🎮 Entertainment</option>
+                            <option value="Utilities">💡 Utilities</option>
+                            <option value="Shopping">🛍️ Shopping</option>
+                            <option value="Healthcare">⚕️ Healthcare</option>
+                            <option value="Education">📚 Education</option>
+                            <option value="Others">📌 Others</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Date</label>
+                        <input type="date" class="form-control" id="expenseDate">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Note (Optional)</label>
+                        <textarea class="form-control" id="expenseNote" rows="2" placeholder="Add any notes..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-gradient" id="saveExpenseBtn">Save Expense</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ─── Modal instances (created once, reused always) ───────────────────────
+        const salaryModalEl  = document.getElementById('salaryModal');
+        const expenseModalEl = document.getElementById('expenseModal');
+        const salaryModal    = new bootstrap.Modal(salaryModalEl);
+        const expenseModal   = new bootstrap.Modal(expenseModalEl);
+
+        // ─── Open modals via buttons (not data-bs-toggle, so we control it) ──────
+        document.getElementById('openSalaryBtn').addEventListener('click',  () => salaryModal.show());
+        document.getElementById('openExpenseBtn').addEventListener('click', () => {
+            resetExpenseForm();
+            expenseModal.show();
+        });
+
+        // ─── Reset expense form to "Add" state ───────────────────────────────────
+        function resetExpenseForm() {
+            document.getElementById('expenseId').value       = '';
+            document.getElementById('expenseName').value     = '';
+            document.getElementById('expenseAmount').value   = '';
+            document.getElementById('expenseCategory').value = '';
+            document.getElementById('expenseNote').value     = '';
+            document.getElementById('expenseDate').valueAsDate = new Date();
+            document.getElementById('expenseModalLabel').innerHTML = '<i class="bi bi-plus-circle me-2"></i>Add Expense';
+            document.getElementById('saveExpenseBtn').disabled = false;
+        }
+
+        // ─── Toast helpers ────────────────────────────────────────────────────────
+        function showToast(message) {
+            document.getElementById('toastMessage').innerText = message;
+            bootstrap.Toast.getOrCreateInstance(document.getElementById('successToast')).show();
+        }
+
+        function showError(message) {
+            document.getElementById('errorToastMessage').innerText = message;
+            bootstrap.Toast.getOrCreateInstance(document.getElementById('errorToast')).show();
+        }
+
+        // ─── Safe modal close: hides + cleans up any orphaned backdrop ───────────
+        function closeModal(modalInstance, modalEl) {
+            try {
+                modalInstance.hide();
+            } catch(e) { /* ignore */ }
+
+            // Safety net: force-remove backdrop if Bootstrap leaves it behind
+            setTimeout(() => {
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+            }, 300);
+        }
+
+        // ─── Save Salary ──────────────────────────────────────────────────────────
+        document.getElementById('saveSalaryBtn').addEventListener('click', async function () {
+            const amount = document.getElementById('salaryInput').value.trim();
+            if (!amount || isNaN(amount) || Number(amount) < 0) {
+                showError('Please enter a valid salary amount.');
+                return;
+            }
+
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+
+            try {
+                const formData = new FormData();
+                formData.append('Amount', amount);
+
+                const res = await fetch('/Salary/SaveSalary', { method: 'POST', body: formData });
+
+                if (!res.ok) throw new Error('Server error: ' + res.status);
+
+                closeModal(salaryModal, salaryModalEl);
+                document.getElementById('salaryInput').value = '';
+                showToast('Salary updated successfully!');
+                await refreshTotals();
+                await refreshHistory();
+            } catch (err) {
+                console.error('saveSalary error:', err);
+                showError('Failed to save salary. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Save Salary';
+            }
+        });
+
+        // ─── Save / Update Expense ────────────────────────────────────────────────
+        document.getElementById('saveExpenseBtn').addEventListener('click', async function () {
+            const name     = document.getElementById('expenseName').value.trim();
+            const amount   = document.getElementById('expenseAmount').value.trim();
+            const category = document.getElementById('expenseCategory').value;
+            const date     = document.getElementById('expenseDate').value;
+
+            if (!name || !amount || !category || !date) {
+                showError('Please fill in all required fields.');
+                return;
+            }
+            if (isNaN(amount) || Number(amount) < 0) {
+                showError('Please enter a valid amount.');
+                return;
+            }
+
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+
+            try {
+                const expenseId = document.getElementById('expenseId').value;
+                const url = expenseId ? '/Expense/UpdateExpense' : '/Expense/AddExpense';
+
+                const formData = new FormData();
+                if (expenseId) formData.append('Id', expenseId);
+                formData.append('Name',     name);
+                formData.append('Amount',   amount);
+                formData.append('Category', category);
+                formData.append('Date',     date);
+                formData.append('Note',     document.getElementById('expenseNote').value.trim());
+
+                const res = await fetch(url, { method: 'POST', body: formData });
+
+                if (!res.ok) throw new Error('Server error: ' + res.status);
+
+                closeModal(expenseModal, expenseModalEl);
+                showToast(expenseId ? 'Expense updated!' : 'Expense added!');
+                await loadExpenses();
+                await refreshTotals();
+                await refreshHistory();
+            } catch (err) {
+                console.error('saveExpense error:', err);
+                showError('Failed to save expense. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Save Expense';
+            }
+        });
+
+        // ─── Edit Expense ─────────────────────────────────────────────────────────
+        async function editExpense(id) {
+            try {
+                const res  = await fetch(`/Expense/GetExpense/${id}`);
+                if (!res.ok) throw new Error('Could not load expense');
+                const data = await res.json();
+
+                document.getElementById('expenseId').value       = data.id;
+                document.getElementById('expenseName').value     = data.name;
+                document.getElementById('expenseAmount').value   = data.amount;
+                document.getElementById('expenseCategory').value = data.category;
+                document.getElementById('expenseDate').value     = data.date.split('T')[0];
+                document.getElementById('expenseNote').value     = data.note || '';
+                document.getElementById('expenseModalLabel').innerHTML = '<i class="bi bi-pencil me-2"></i>Edit Expense';
+                document.getElementById('saveExpenseBtn').disabled = false;
+
+                expenseModal.show();
+            } catch (err) {
+                console.error('editExpense error:', err);
+                showError('Could not load expense details.');
+            }
+        }
+
+        // ─── Delete Expense ───────────────────────────────────────────────────────
+        async function deleteExpense(id) {
+            if (!confirm('Delete this expense?')) return;
+            try {
+                const res = await fetch(`/Expense/DeleteExpense/${id}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('Delete failed');
+                showToast('Expense deleted!');
+                await loadExpenses();
+                await refreshTotals();
+                await refreshHistory();
+            } catch (err) {
+                console.error('deleteExpense error:', err);
+                showError('Could not delete expense.');
+            }
+        }
+
+        // ─── Clear All Expenses ───────────────────────────────────────────────────
+        async function clearAllExpenses() {
+            if (!confirm('Delete ALL expenses? This cannot be undone!')) return;
+            try {
+                const res = await fetch('/Expense/ClearAll', { method: 'DELETE' });
+                if (!res.ok) throw new Error('Clear failed');
+                showToast('All expenses cleared!');
+                await loadExpenses();
+                await refreshTotals();
+                await refreshHistory();
+            } catch (err) {
+                console.error('clearAll error:', err);
+                showError('Could not clear expenses.');
+            }
+        }
+
+        // ─── Load Expenses ────────────────────────────────────────────────────────
+        async function loadExpenses() {
+            try {
+                const res      = await fetch('/Expense/GetExpenses');
+                if (!res.ok) throw new Error('Load failed');
+                const expenses = await res.json();
+                const container = document.getElementById('expenseList');
+
+                if (!expenses.length) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="bi bi-inbox"></i>
+                            <h5>No expenses yet</h5>
+                            <p class="text-muted">Click the + button to add your first expense</p>
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = expenses.map(exp => `
+                    <div class="expense-item">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+                                    <h6 class="mb-0">${escHtml(exp.name)}</h6>
+                                    <span class="category-badge bg-${getCategoryColor(exp.category)} text-white">
+                                        ${escHtml(exp.category)}
+                                    </span>
+                                </div>
+                                <div class="text-muted small mb-1">
+                                    <i class="bi bi-calendar me-1"></i>${formatDate(exp.date)}
+                                </div>
+                                ${exp.note ? `<div class="text-muted small"><i class="bi bi-sticky me-1"></i>${escHtml(exp.note)}</div>` : ''}
+                            </div>
+                            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                                <div class="fw-bold fs-5 text-danger me-1">₹${exp.amount}</div>
+                                <button class="btn btn-outline-primary action-btn" onclick="editExpense(${exp.id})" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-danger action-btn" onclick="deleteExpense(${exp.id})" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error('loadExpenses error:', err);
+            }
+        }
+
+        // ─── Refresh Totals ───────────────────────────────────────────────────────
+        async function refreshTotals() {
+            try {
+                const res  = await fetch('/Dashboard/GetTotals');
+                if (!res.ok) throw new Error('Totals fetch failed');
+                const data = await res.json();
+
+                document.getElementById('totalExpenses').innerText  = '₹' + data.total;
+                document.getElementById('expenseCount').innerText   = data.count;
+                document.getElementById('salaryAmount').innerText   = '₹' + data.salary;
+                document.getElementById('monthlySavings').innerText = '₹' + data.savings;
+
+                const pct = data.salary > 0 ? ((data.savings / data.salary) * 100).toFixed(1) : 0;
+                document.getElementById('savingsPercentage').innerText = pct;
+            } catch (err) {
+                console.error('refreshTotals error:', err);
+            }
+        }
+
+        // ─── Refresh History ──────────────────────────────────────────────────────
+        async function refreshHistory() {
+            try {
+                const res  = await fetch('/Dashboard/GetHistory');
+                if (!res.ok) throw new Error('History fetch failed');
+                const data = await res.json();
+
+                document.getElementById('historyTableBody').innerHTML = data.map(h => `
+                    <tr>
+                        <td class="fw-bold">${escHtml(h.month)}</td>
+                        <td class="text-success fw-bold">₹${h.savings}</td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('refreshHistory error:', err);
+            }
+        }
+
+        // ─── Helpers ──────────────────────────────────────────────────────────────
+        function getCategoryColor(category) {
+            const colors = {
+                'Food': 'warning', 'Transport': 'primary', 'Entertainment': 'info',
+                'Utilities': 'secondary', 'Shopping': 'danger', 'Healthcare': 'success',
+                'Education': 'dark', 'Others': 'secondary'
+            };
+            return colors[category] || 'secondary';
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        // Prevent XSS in dynamically rendered content
+        function escHtml(str) {
+            const d = document.createElement('div');
+            d.textContent = str || '';
+            return d.innerHTML;
+        }
+
+        // ─── On page load ─────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('expenseDate').valueAsDate = new Date();
+            loadExpenses();
+            refreshTotals();
+            refreshHistory();
+        });
+    </script>
+</body>
+</html>

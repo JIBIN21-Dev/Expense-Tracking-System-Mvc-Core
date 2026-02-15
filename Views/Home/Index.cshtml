@@ -1,0 +1,732 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>JOSS - Smart Expense Tracking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #10b981;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            padding: 10px 0;
+            z-index: 9999;
+        }
+
+        .brand-logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .btn-login {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+            border-radius: 25px;
+            padding: 8px 24px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+            .btn-login:hover {
+                background: var(--primary);
+                color: white;
+            }
+
+        .btn-register {
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
+            color: white !important;
+            font-weight: 600;
+            border-radius: 25px;
+            padding: 8px 24px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+            .btn-register:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+                color: white !important;
+            }
+
+        /* Mobile navbar collapse area */
+        @@media (max-width: 991.98px) {
+            .navbar-collapse
+
+        {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            padding: 16px 20px;
+            margin-top: 10px;
+            border: 1px solid #f0f0f0;
+        }
+
+        .navbar-nav .nav-item {
+            margin: 4px 0;
+        }
+
+        .navbar-nav .nav-link {
+            padding: 10px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .navbar-nav .nav-item:last-child .nav-link {
+            border-bottom: none;
+        }
+
+        .navbar-nav .ms-3,
+        .navbar-nav .ms-2 {
+            margin-left: 0 !important;
+            margin-top: 8px;
+        }
+
+        .btn-login,
+        .btn-register {
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero-section {
+            min-height: 100vh;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%);
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 100px 0 60px; /* top padding accounts for fixed navbar */
+        }
+
+            .hero-section::before {
+                content: '';
+                position: absolute;
+                width: 500px;
+                height: 500px;
+                background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+                border-radius: 50%;
+                top: -100px;
+                left: -100px;
+                animation: float 8s ease-in-out infinite;
+                pointer-events: none;
+            }
+
+        @@keyframes float {
+            0%, 100%
+
+        {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(30px);
+        }
+
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        .btn-get-started {
+            background: linear-gradient(135deg, var(--secondary), #059669);
+            color: white;
+            font-weight: 700;
+            padding: 14px 40px;
+            border-radius: 50px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+            .btn-get-started:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
+                color: white;
+            }
+
+        /* ===== FEATURE CARDS ===== */
+        .feature-card {
+            text-align: center;
+            padding: 30px 20px;
+            border-radius: 15px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s;
+            height: 100%;
+        }
+
+            .feature-card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            }
+
+        .feature-icon {
+            font-size: 3rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+
+        .feature-desc {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        /* ===== PREVIEW SECTION ===== */
+        .preview-section {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: #6b7280;
+            margin-bottom: 50px;
+        }
+
+        /* ===== STAT CARDS ===== */
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            height: 100%;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            }
+
+        .stat-label {
+            font-weight: 600;
+            color: #6b7280;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+            .stat-value.income {
+                color: var(--secondary);
+            }
+
+            .stat-value.expense {
+                color: var(--danger);
+            }
+
+            .stat-value.saving {
+                color: var(--primary);
+            }
+
+        /* ===== SECURITY SECTION ===== */
+        .security-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+        }
+
+        .security-badge {
+            display: inline-block;
+            padding: 10px 25px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 50px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .security-list {
+            list-style: none;
+            padding: 0;
+        }
+
+            .security-list li {
+                padding: 15px 0;
+                font-size: 1.05rem;
+                display: flex;
+                align-items: flex-start;
+                color: #4a5568;
+                gap: 12px;
+            }
+
+                .security-list li i {
+                    color: var(--secondary);
+                    font-size: 1.4rem;
+                    flex-shrink: 0;
+                    margin-top: 2px;
+                }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: #1f2937;
+            color: white;
+            padding: 60px 0 30px;
+        }
+
+        .footer-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            margin: 0 5px;
+            transition: all 0.3s;
+        }
+
+            .social-links a:hover {
+                background: linear-gradient(135deg, var(--primary), var(--secondary));
+                transform: translateY(-3px);
+            }
+
+        /* ===== RESPONSIVE FIXES ===== */
+        @@media (max-width: 768px) {
+            /* Hero */
+            .hero-section
+
+        {
+            padding: 90px 0 50px;
+            min-height: auto;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: 2.2rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            padding: 0 10px;
+        }
+
+        .btn-get-started {
+            padding: 12px 30px;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 280px;
+        }
+
+        /* Section titles */
+        .section-title {
+            font-size: 1.8rem;
+        }
+
+        .section-subtitle {
+            font-size: 1rem;
+        }
+
+        /* Stat values smaller on mobile */
+        .stat-value {
+            font-size: 1.6rem;
+        }
+
+        /* Security section icon hide on small phones */
+        .security-icon-col {
+            display: none;
+        }
+
+        /* Feature cards spacing */
+        .feature-card {
+            padding: 25px 15px;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 40px 0 20px;
+        }
+
+        .social-links {
+            margin-top: 15px;
+        }
+
+        }
+
+        @@media (max-width: 480px) {
+            .hero-title
+
+        {
+            font-size: 1.9rem;
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+        }
+
+        .security-list li {
+            font-size: 0.95rem;
+        }
+
+        }
+    </style>
+</head>
+<body>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#home">
+                <i class="bi bi-wallet2 me-2" style="font-size: 2rem; color: var(--primary);"></i>
+                <span class="brand-logo">JOSS</span>
+            </a>
+
+            <!-- Hamburger button — must come before collapse div -->
+            <button class="navbar-toggler" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarNav"
+                    aria-controls="navbarNav"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold" href="#features">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold" href="#security">Security</a>
+                    </li>
+                    <li class="nav-item ms-lg-3">
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-login w-100">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                        </a>
+                    </li>
+                    <li class="nav-item ms-lg-2">
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-register w-100">
+                            <i class="bi bi-person-plus me-1"></i> Register
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="home">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 text-center text-lg-start">
+                    <h1 class="hero-title mb-4">Smart Money Management</h1>
+                    <p class="hero-subtitle mb-4">
+                        Take control of your finances with JOSS - Track expenses, manage your budget,
+                        and see exactly where your money goes. Start saving smarter today!
+                    </p>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-get-started">
+                        <i class="bi bi-rocket-takeoff me-2"></i> Get Started Free
+                    </a>
+                </div>
+                <div class="col-lg-6 text-center d-none d-lg-block">
+                    <i class="bi bi-piggy-bank-fill" style="font-size: 18rem; color: rgba(99, 102, 241, 0.1);"></i>
+                </div>
+            </div>
+
+            <!-- Feature Highlights -->
+            <div class="row g-4 mt-4 mt-lg-5" id="features">
+                <div class="col-sm-6 col-md-4">
+                    <div class="feature-card">
+                        <span class="feature-icon"><i class="bi bi-shield-lock-fill"></i></span>
+                        <div class="feature-title">Bank-Level Security</div>
+                        <div class="feature-desc">Your data is encrypted and protected with the latest security standards</div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-4">
+                    <div class="feature-card">
+                        <span class="feature-icon"><i class="bi bi-graph-up-arrow"></i></span>
+                        <div class="feature-title">Track Your Savings</div>
+                        <div class="feature-desc">See real-time savings and manage expenses with smart analytics</div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-4">
+                    <div class="feature-card">
+                        <span class="feature-icon"><i class="bi bi-phone-fill"></i></span>
+                        <div class="feature-title">Access Anywhere</div>
+                        <div class="feature-desc">Manage your finances anytime, anywhere on any device</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Preview Section -->
+    <section class="preview-section">
+        <div class="container">
+            <div class="text-center mb-4 mb-md-5">
+                <h2 class="section-title">Track Your Finances Easily</h2>
+                <p class="section-subtitle">Monitor salary, expenses, and savings with the JOSS dashboard</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row g-3 g-md-4 mb-4 mb-md-5">
+                <div class="col-12 col-sm-4">
+                    <div class="stat-card">
+                        <div class="stat-label">💰 Monthly Salary</div>
+                        <div class="stat-value income">₹50,000</div>
+                        <small class="text-muted">Current Month</small>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <div class="stat-card">
+                        <div class="stat-label">📊 Total Expenses</div>
+                        <div class="stat-value expense">₹18,500</div>
+                        <small class="text-muted">12 transactions</small>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <div class="stat-card">
+                        <div class="stat-label">🏦 Monthly Savings</div>
+                        <div class="stat-value saving">₹31,500</div>
+                        <small class="text-muted">63% of salary</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features List -->
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start mb-4">
+                        <i class="bi bi-check-circle-fill text-success fs-3 me-3 flex-shrink-0"></i>
+                        <div>
+                            <h5 class="fw-bold">Add &amp; Edit Expenses</h5>
+                            <p class="text-muted mb-0">Easily add, edit, or delete expenses with categories and notes</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start mb-4">
+                        <i class="bi bi-check-circle-fill text-success fs-3 me-3 flex-shrink-0"></i>
+                        <div>
+                            <h5 class="fw-bold">Smart Categories</h5>
+                            <p class="text-muted mb-0">Organize expenses with 8+ categories including Food, Transport, Shopping</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start mb-4">
+                        <i class="bi bi-check-circle-fill text-success fs-3 me-3 flex-shrink-0"></i>
+                        <div>
+                            <h5 class="fw-bold">Monthly History</h5>
+                            <p class="text-muted mb-0">View past months' spending patterns and savings trends</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start mb-4">
+                        <i class="bi bi-check-circle-fill text-success fs-3 me-3 flex-shrink-0"></i>
+                        <div>
+                            <h5 class="fw-bold">Real-time Updates</h5>
+                            <p class="text-muted mb-0">Watch your savings grow with automatic calculations</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Security Section -->
+    <section class="security-section" id="security">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <span class="security-badge">
+                        <i class="bi bi-shield-check me-2"></i> Secure &amp; Private
+                    </span>
+                    <h2 class="section-title mb-4">Your Data is Safe with Us</h2>
+                    <p class="lead text-muted mb-4">
+                        We take your privacy seriously. Your financial data is protected with industry-leading security measures.
+                    </p>
+                    <ul class="security-list">
+                        <li>
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span><strong>Encrypted Storage</strong> - All data is encrypted and stored securely</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span><strong>Private &amp; Confidential</strong> - Only you can access your data</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span><strong>Secure Login</strong> - Session-based authentication keeps you safe</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span><strong>No Data Sharing</strong> - We never sell your information</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-6 text-center security-icon-col d-none d-lg-block">
+                    <i class="bi bi-shield-lock-fill" style="font-size: 18rem; color: rgba(16, 185, 129, 0.1);"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="preview-section bg-white">
+        <div class="container text-center px-3">
+            <h2 class="section-title mb-3">Ready to Take Control?</h2>
+            <p class="section-subtitle mb-4">Join thousands managing their finances smarter with JOSS</p>
+            <a asp-controller="Account" asp-action="Register" class="btn btn-get-started btn-lg">
+                <i class="bi bi-person-plus me-2"></i> Create Free Account
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row mb-4 align-items-center">
+                <div class="col-12 col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    <div class="d-flex align-items-center justify-content-center justify-content-md-start mb-2">
+                        <i class="bi bi-wallet2 me-2" style="font-size: 2rem; color: var(--primary);"></i>
+                        <span class="footer-brand">JOSS</span>
+                    </div>
+                    <p class="text-muted mb-0">Smart expense tracking made simple</p>
+                </div>
+                <div class="col-12 col-md-6 text-center text-md-end">
+                    <div class="social-links">
+                        <a href="#" title="Security"><i class="bi bi-shield-check"></i></a>
+                        <a href="#" title="Email"><i class="bi bi-envelope"></i></a>
+                        <a href="#" title="Support"><i class="bi bi-headset"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr style="border-color: rgba(255,255,255,0.1);">
+            <div class="text-center text-muted">
+                <p class="mb-0">&copy; 2026 JOSS - Smart Expense Tracking. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS — must load BEFORE your custom script -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Close navbar on mobile when a nav-link (anchor) is clicked
+        document.querySelectorAll('#navbarNav .nav-link[href^="#"]').forEach(function(link) {
+            link.addEventListener('click', function() {
+                var navbarCollapse = document.getElementById('navbarNav');
+                if (navbarCollapse.classList.contains('show')) {
+                    var toggler = document.querySelector('.navbar-toggler');
+                    toggler.click();
+                }
+            });
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+            anchor.addEventListener('click', function(e) {
+                var href = this.getAttribute('href');
+                if (href === '#') return;
+                e.preventDefault();
+                var target = document.querySelector(href);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Navbar shadow on scroll
+        window.addEventListener('scroll', function() {
+            var navbar = document.querySelector('.navbar-custom');
+            if (window.scrollY > 50) {
+                navbar.style.boxShadow = '0 4px 20px rgba(0,0,0,0.12)';
+            } else {
+                navbar.style.boxShadow = '0 2px 15px rgba(0,0,0,0.08)';
+            }
+        });
+    </script>
+</body>
+</html>
